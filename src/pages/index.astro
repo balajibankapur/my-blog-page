@@ -1,0 +1,127 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <style>
+      main { max-width: 720px; margin: 0 auto; padding: 3.5rem 1.25rem 4rem; }
+
+      .hero { margin-bottom: 3rem; }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--accent);
+        margin: 0 0 0.75rem;
+      }
+      .hero h1 {
+        font-size: 2rem !important;
+        line-height: 1.2;
+        margin: 0 0 1rem;
+      }
+      .lede {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: rgb(var(--gray-dark));
+        margin: 0 0 1.25rem;
+      }
+      .cta-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1.25rem;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.55rem 1.1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      .btn-primary { background: var(--accent); color: white; }
+      .btn-secondary { border: 1px solid rgb(var(--gray-light)); color: rgb(var(--gray-dark)); }
+      .btn:hover { opacity: 0.9; }
+
+      section h2 {
+        font-size: 1rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: rgb(var(--gray));
+        margin: 0 0 1.25rem;
+        font-weight: 600;
+      }
+
+      .posts { margin-top: 3.5rem; }
+      ul.post-list { list-style: none; padding: 0; margin: 0; }
+      ul.post-list li {
+        padding: 1.25rem 0;
+        border-bottom: 1px solid rgb(var(--gray-light));
+      }
+      ul.post-list li:first-child { padding-top: 0; }
+      ul.post-list a { text-decoration: none; color: inherit; display: block; }
+      ul.post-list a:hover .post-title { color: var(--accent); }
+      .post-title { font-size: 1.2rem; font-weight: 600; margin: 0 0 0.3rem; }
+      .post-date { font-size: 0.85rem; color: rgb(var(--gray)); margin: 0; }
+      .post-desc { margin: 0.4rem 0 0; color: rgb(var(--gray-dark)); line-height: 1.5; }
+
+      .see-all {
+        display: inline-block;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .see-all:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Software Architecture · Artificial Intelligence · Continuous Learning</p>
+        <h1>Hi, I’m Balaji Bankapur.</h1>
+        <p class="lede">
+          I’m a Senior Principal Software Engineer and Software Architect with
+          more than 20 years of experience building complex, mission-critical
+          systems. This is where I explore how AI is reshaping the way we
+          design and build software — as an engineer, not a spectator.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="/about">More about me →</a>
+          <a class="btn btn-secondary" href="/blog">Read the blog</a>
+        </div>
+      </section>
+
+      <section class="posts">
+        <h2>Latest writing</h2>
+        <ul class="post-list">
+          {posts.slice(0, 5).map((post) => (
+            <li>
+              <a href={`/blog/${post.id}/`}>
+                <p class="post-title">{post.data.title}</p>
+                <p class="post-date"><FormattedDate date={post.data.pubDate} /></p>
+                {post.data.description && <p class="post-desc">{post.data.description}</p>}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {posts.length > 5 && <a class="see-all" href="/blog">See all posts →</a>}
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

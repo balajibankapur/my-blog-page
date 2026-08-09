@@ -1,0 +1,146 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/BlogPost.astro';
+import balajiPhoto from '../assets/balaji.jpg';
+---
+
+<Layout
+  title="About"
+  description="Software Architecture. Artificial Intelligence. Continuous Learning."
+  pubDate={new Date()}
+>
+  <p class="tagline">Software Architecture · Artificial Intelligence · Continuous Learning</p>
+
+  <Image
+    src={balajiPhoto}
+    alt="Balaji Bankapur"
+    width={400}
+    class="about-photo"
+    loading="eager"
+  />
+
+  <p>
+    I’m <strong>Balaji Bankapur</strong>, a Senior Principal Software Engineer
+    and Software Architect with more than 20 years of experience building
+    software products and complex engineering systems — spanning operating
+    systems, enterprise software, healthcare technology, and medical devices.
+    My work has increasingly focused on software architecture and system
+    design, where reliability, safety, and long-lived engineering discipline
+    really matter.
+  </p>
+
+  <p>
+    Today, I’m exploring how Artificial Intelligence is reshaping the way we
+    design and build software — from the perspective of an engineer and
+    architect, not a spectator.
+  </p>
+
+  <h2>Background</h2>
+
+  <p>
+    My career started with traditional software engineering, and over time
+    moved from writing software to thinking about how entire systems should
+    be designed: how components interact, how information flows, how failures
+    are handled, and how architectural decisions age over years of production
+    use. Working on medical-device and healthcare software reinforced a belief
+    I carry into everything I build:
+  </p>
+
+  <blockquote>
+    Good technology is not just about making something work. It’s about making
+    it reliable, understandable, maintainable, and fit for its purpose.
+  </blockquote>
+
+  <p>That architectural mindset now shapes how I look at AI.</p>
+
+  <h2>Where I’m Focused</h2>
+
+  <p>
+    Large Language Models are no longer just tools for generating text —
+    they’re becoming components inside software systems that reason, retrieve
+    knowledge, use tools, and coordinate with other agents. That raises real
+    architectural questions: how to design AI systems that are reliable,
+    evaluable, and worth trusting in production. Those are the questions I’m
+    working through here.
+  </p>
+
+  <p>My current focus areas:</p>
+
+  <ul>
+    <li><strong>Generative AI</strong> — LLMs, RAG, vector databases, prompt engineering, evaluation, and AI application architecture.</li>
+    <li><strong>Agentic AI</strong> — planning, tool use, multi-agent systems, orchestration, and autonomous workflows.</li>
+    <li><strong>AI + Software Architecture</strong> — patterns for integrating LLMs, agents, knowledge stores, memory, and evaluators into real systems.</li>
+    <li><strong>Knowledge &amp; Reasoning</strong> — knowledge graphs, semantic relationships, AI memory, and how machines represent and retrieve what they know.</li>
+  </ul>
+
+  <h2>How I Write</h2>
+
+  <p>
+    I believe the best way to understand technology is to build with it. Reading
+    about an AI architecture and actually implementing one are two very
+    different things — the second is where the honest questions live: what
+    happens when the model is wrong, when an agent gets stuck, when cost or
+    latency blow up, when evaluation is harder than the feature itself.
+  </p>
+
+  <p>
+    This site is where I document those experiments, decisions, successes, and
+    failures. You’ll find articles on practical AI, agentic systems, software
+    architecture, and hands-on prototypes — including the ones that didn’t
+    work, because a failed experiment often teaches more than a polished demo.
+    I try to write for engineers and architects who want more signal than hype.
+  </p>
+
+  <h2>Beyond the Code</h2>
+
+  <p>
+    Outside of technology, I’m interested in how people think, learn, remember,
+    and make decisions — psychology, cognitive science, and human learning.
+    As AI systems become more capable, the relationship between human and
+    machine intelligence feels increasingly worth understanding.
+  </p>
+
+  <h2>Get in Touch</h2>
+
+  <p>
+    If you’re working on practical AI, AI architecture, or the challenges of
+    taking AI from prototype to production, I’d enjoy the conversation. You
+    can reach me at
+    <a href="mailto:bankapur.balaji@gmail.com">bankapur.balaji@gmail.com</a>.
+  </p>
+</Layout>
+
+<style is:global>
+  .tagline {
+    font-size: 0.95rem;
+    color: rgb(var(--gray));
+    letter-spacing: 0.02em;
+    margin: -0.5rem 0 1.5rem;
+  }
+  .about-photo {
+    width: 220px;
+    height: auto;
+    border-radius: 8px;
+    float: right;
+    margin: 0.25rem 0 1rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    shape-outside: margin-box;
+  }
+  @media (max-width: 520px) {
+    .about-photo {
+      float: none;
+      display: block;
+      margin: 0 auto 1.5rem;
+      width: 200px;
+    }
+  }
+  article blockquote {
+    margin: 1.5rem 0;
+    padding: 0.25rem 1.25rem;
+    border-left: 3px solid var(--accent);
+    color: rgb(var(--gray-dark));
+    font-style: italic;
+    font-size: 1.05em;
+  }
+  article h2 { margin-top: 2.25rem; }
+</style>
