@@ -386,12 +386,49 @@ article blockquote {
 }
 @media (max-width: 600px) {
 	.tension-map {
-		grid-template-columns: 1fr;
-		gap: 0.25rem;
+		display: block;
+		padding: 0.5rem;
+		background: transparent;
+		border: 0;
 	}
-	.tension-map .tm-head.right { text-align: left; }
-	.tension-map .tm-reality { justify-content: flex-start; text-align: left; padding-bottom: 0.9rem; border-bottom: 1px dashed rgb(var(--gray-light)); }
-	.tension-map .tm-vs { display: none; }
+	.tension-map .tm-head { display: none; }
+	.tension-map .tm-promise {
+		display: block;
+		background: #fff;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 8px 8px 0 0;
+		border-bottom: 0;
+		text-align: center;
+		padding: 0.65rem 0.75rem;
+		margin-top: 0.85rem;
+		font-weight: 600;
+		color: rgb(var(--black));
+		font-size: 0.95rem;
+	}
+	.tension-map .tm-vs {
+		display: block;
+		background: rgb(var(--gray-light));
+		text-align: center;
+		padding: 0.15rem 0;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: rgb(var(--gray-dark));
+		border-left: 1px solid rgb(var(--gray-light));
+		border-right: 1px solid rgb(var(--gray-light));
+	}
+	.tension-map .tm-reality {
+		display: block;
+		background: #fff;
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 0 0 8px 8px;
+		border-top: 0;
+		text-align: center;
+		padding: 0.65rem 0.75rem;
+		justify-content: center;
+		color: rgb(var(--gray-dark));
+		font-size: 0.95rem;
+	}
 }
 
 .sr-only {
