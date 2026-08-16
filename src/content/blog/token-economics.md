@@ -78,7 +78,7 @@ A few patterns that work well:
 - **Keep system prompts stable.** Anything that doesn’t change per request (role, task definition, format rules) belongs in the *system prompt*. Keep it stable and most providers will *cache* it, so you pay a fraction of the normal rate on every call.
 - **Skip *"think step by step"* unless you need reasoning.** *Chain-of-thought* prompting helps on hard problems, but can double or triple output length. Wasteful for classification or short factual answers.
 - **Cut politeness padding and repeated instructions.** *"Please"*, *"kindly"*, and repeating the same instruction two different ways all cost tokens. Tiny wins each, meaningful at 100k calls a day.
-- **A/B test small wording changes.** The same task, worded more leanly, can cut token count 30–50% with no quality loss. Measure, don’t guess.
+- **A/B test small wording changes.** Run two versions of the same prompt on real examples and compare the results. The leaner one often cuts token count 30–50% with no quality loss. Measure, don’t guess.
 
 The goal isn’t the shortest possible prompt. It’s the prompt that reliably gets the outcome for the least token spend. And the payoff isn’t just cheaper calls. **Tight prompts save your time, cut iteration cycles, and make you a sharper thinker about what you actually want from the model.**
 
