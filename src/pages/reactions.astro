@@ -1,0 +1,194 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import { Redis } from '@upstash/redis';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_TITLE } from '../consts';
+
+const redis = Redis.fromEnv();
+
+const REACTIONS = [
+	{ key: 'helped_me', icon: '👍', label: 'Helped me' },
+	{ key: 'learned', icon: '💡', label: 'Learned' },
+	{ key: 'use', icon: '⚡', label: "I'll use" },
+	{ key: 'shallow', icon: '📏', label: 'Shallow' },
+	{ key: 'unclear', icon: '🔍', label: 'Unclear' },
+] as const;
+
+type Reaction = (typeof REACTIONS)[number]['key'];
+
+async function fetchCounts(slug: string): Promise<Record<Reaction, number>> {
+	const raw = (await redis.hgetall(`reactions:${slug}`)) as Record<string, number | string> | null;
+	const counts = Object.fromEntries(REACTIONS.map((r) => [r.key, 0])) as Record<Reaction, number>;
+	if (raw) {
+		for (const r of REACTIONS) {
+			const v = raw[r.key];
+			counts[r.key] = typeof v === 'number' ? v : v ? parseInt(String(v), 10) || 0 : 0;
+		}
+	}
+	return counts;
+}
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+const rows = await Promise.all(
+	posts.map(async (post) => {
+		const counts = await fetchCounts(post.id);
+		const total = Object.values(counts).reduce((a, b) => a + b, 0);
+		return { post, counts, total };
+	}),
+);
+
+const grandTotals = REACTIONS.reduce(
+	(acc, r) => {
+		acc[r.key] = rows.reduce((sum, row) => sum + row.counts[r.key], 0);
+		return acc;
+	},
+	{} as Record<Reaction, number>,
+);
+const grandTotalAll = Object.values(grandTotals).reduce((a, b) => a + b, 0);
+
+const pageTitle = `Reactions · ${SITE_TITLE}`;
+const pageDescription = 'Reader reactions across all posts.';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={pageTitle} description={pageDescription} />
+		<meta name="robots" content="noindex" />
+		<style>
+			main {
+				width: 100%;
+				max-width: 960px;
+				margin: 0 auto;
+				padding: 3.5rem 1.5rem 4rem;
+				box-sizing: border-box;
+			}
+			.page-header {
+				margin-bottom: 2rem;
+				padding-bottom: 1.5rem;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.page-header h1 {
+				font-size: 2rem !important;
+				margin: 0 0 0.5rem;
+				line-height: 1.2;
+			}
+			.page-header p { color: rgb(var(--gray-dark)); margin: 0; font-size: 1rem; }
+			.summary {
+				display: flex;
+				gap: 0.75rem;
+				flex-wrap: wrap;
+				margin-bottom: 2rem;
+			}
+			.summary-item {
+				padding: 0.5rem 0.85rem;
+				background: #fafbfc;
+				border: 1px solid rgb(var(--gray-light));
+				border-radius: 999px;
+				font-size: 0.9rem;
+				color: rgb(var(--gray-dark));
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+			}
+			.summary-item strong { color: rgb(var(--black)); font-variant-numeric: tabular-nums; }
+			.table-wrap { overflow-x: auto; }
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 0.92rem;
+			}
+			th, td {
+				padding: 0.7rem 0.6rem;
+				text-align: left;
+				border-bottom: 1px solid rgb(var(--gray-light));
+				vertical-align: top;
+			}
+			th {
+				font-size: 0.75rem;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				color: rgb(var(--gray));
+				font-weight: 600;
+				background: #fafbfc;
+			}
+			th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
+			td.num { color: rgb(var(--gray-dark)); }
+			td.num.zero { color: rgb(var(--gray-light)); }
+			td.num strong { color: rgb(var(--black)); }
+			tbody tr:hover { background: #fafbfc; }
+			.post-title { font-weight: 600; color: rgb(var(--black)); text-decoration: none; }
+			.post-title:hover { color: var(--accent); }
+			.post-date { display: block; color: rgb(var(--gray)); font-size: 0.8rem; margin-top: 0.15rem; }
+			.empty { text-align: center; padding: 3rem 1rem; color: rgb(var(--gray)); font-style: italic; }
+			@media (max-width: 640px) {
+				main { padding: 2rem 1rem 3rem; }
+				.page-header h1 { font-size: 1.6rem !important; }
+				th, td { padding: 0.55rem 0.4rem; font-size: 0.85rem; }
+				.post-date { font-size: 0.75rem; }
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<header class="page-header">
+				<h1>Reactions</h1>
+				<p>Reader feedback across all posts. Private-ish, not linked in the nav.</p>
+			</header>
+
+			<div class="summary">
+				<span class="summary-item">Total reactions <strong>{grandTotalAll}</strong></span>
+				{REACTIONS.map((r) => (
+					<span class="summary-item">
+						<span aria-hidden="true">{r.icon}</span>
+						{r.label} <strong>{grandTotals[r.key]}</strong>
+					</span>
+				))}
+			</div>
+
+			{rows.length === 0 ? (
+				<p class="empty">No posts yet.</p>
+			) : (
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Post</th>
+								{REACTIONS.map((r) => (
+									<th class="num" title={r.label}>{r.icon}</th>
+								))}
+								<th class="num">Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							{rows.map((row) => (
+								<tr>
+									<td>
+										<a class="post-title" href={`/blog/${row.post.id}/`}>{row.post.data.title}</a>
+										<span class="post-date"><FormattedDate date={row.post.data.pubDate} /></span>
+									</td>
+									{REACTIONS.map((r) => (
+										<td class={`num${row.counts[r.key] === 0 ? ' zero' : ''}`}>
+											{row.counts[r.key]}
+										</td>
+									))}
+									<td class="num"><strong>{row.total}</strong></td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			)}
+		</main>
+		<Footer />
+	</body>
+</html>
