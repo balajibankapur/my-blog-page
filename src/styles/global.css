@@ -139,6 +139,28 @@ hr {
 	margin-right: 0.25rem;
 }
 
+/* Formula card: highlighted math/formula display block */
+.formula {
+	text-align: center;
+	padding: 1.1rem 1.25rem;
+	margin: 1.5rem 0;
+	background: #fafbfc;
+	border: 1px solid rgb(var(--gray-light));
+	border-radius: 10px;
+	font-family: var(--font-atkinson), sans-serif;
+	font-size: 0.98rem;
+	line-height: 1.5;
+	color: rgb(var(--black));
+	overflow-x: auto;
+}
+.formula strong { font-weight: 700; }
+@media (max-width: 540px) {
+	.formula {
+		padding: 0.9rem 0.75rem;
+		font-size: 0.88rem;
+	}
+}
+
 /* Reaction panel at end of blog posts */
 .reaction-panel {
 	margin: 3rem 0 1.5rem;
