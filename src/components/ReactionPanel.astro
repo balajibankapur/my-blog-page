@@ -1,0 +1,118 @@
+---
+interface Props {
+	slug: string;
+}
+
+const { slug } = Astro.props;
+
+const reactions = [
+	{ key: 'helped_me', icon: '👍', label: 'Helped me' },
+	{ key: 'learned', icon: '💡', label: 'Learned something new' },
+	{ key: 'use', icon: '⚡', label: "I'll use this" },
+	{ key: 'shallow', icon: '📏', label: 'Too shallow' },
+	{ key: 'unclear', icon: '🔍', label: 'Hard to follow' },
+];
+---
+
+<section class="reaction-panel" data-slug={slug}>
+	<p class="reaction-prompt">Was this useful? A quick tap tells me what to write more of.</p>
+	<ul class="reaction-list">
+		{
+			reactions.map((r) => (
+				<li>
+					<button
+						type="button"
+						class="reaction-btn"
+						data-reaction={r.key}
+						aria-label={`Mark as: ${r.label}`}
+					>
+						<span class="reaction-icon" aria-hidden="true">{r.icon}</span>
+						<span class="reaction-label">{r.label}</span>
+						<span class="reaction-count" data-count>0</span>
+					</button>
+				</li>
+			))
+		}
+	</ul>
+	<p class="reaction-note">Anonymous. No accounts, no tracking beyond a per-browser vote guard.</p>
+</section>
+
+<script>
+	function init() {
+		const panels = document.querySelectorAll<HTMLElement>('.reaction-panel');
+		panels.forEach(async (panel) => {
+			const slug = panel.dataset.slug;
+			if (!slug) return;
+			const storageKey = `reactions:${slug}`;
+			const voted: Record<string, boolean> = JSON.parse(
+				localStorage.getItem(storageKey) || '{}',
+			);
+
+			// Mark previously-clicked buttons as voted
+			panel.querySelectorAll<HTMLButtonElement>('.reaction-btn').forEach((btn) => {
+				const key = btn.dataset.reaction!;
+				if (voted[key]) {
+					btn.classList.add('voted');
+					btn.disabled = true;
+				}
+			});
+
+			// Fetch current counts
+			try {
+				const res = await fetch(`/api/react?slug=${encodeURIComponent(slug)}`);
+				if (res.ok) {
+					const { counts } = await res.json();
+					updateCounts(panel, counts);
+				}
+			} catch {
+				/* silently ignore fetch errors */
+			}
+
+			// Wire up click handlers
+			panel.querySelectorAll<HTMLButtonElement>('.reaction-btn').forEach((btn) => {
+				btn.addEventListener('click', async () => {
+					const key = btn.dataset.reaction!;
+					if (voted[key]) return;
+
+					// Optimistic UI
+					voted[key] = true;
+					localStorage.setItem(storageKey, JSON.stringify(voted));
+					btn.classList.add('voted');
+					btn.disabled = true;
+					const countEl = btn.querySelector<HTMLElement>('[data-count]');
+					if (countEl) {
+						const current = parseInt(countEl.textContent || '0', 10) || 0;
+						countEl.textContent = String(current + 1);
+					}
+
+					try {
+						const res = await fetch(
+							`/api/react?slug=${encodeURIComponent(slug)}&r=${encodeURIComponent(key)}`,
+							{ method: 'POST' },
+						);
+						if (res.ok) {
+							const { counts } = await res.json();
+							updateCounts(panel, counts);
+						}
+					} catch {
+						/* server unreachable — leave the optimistic increment in place */
+					}
+				});
+			});
+		});
+	}
+
+	function updateCounts(panel: HTMLElement, counts: Record<string, number>) {
+		panel.querySelectorAll<HTMLButtonElement>('.reaction-btn').forEach((btn) => {
+			const key = btn.dataset.reaction!;
+			const countEl = btn.querySelector<HTMLElement>('[data-count]');
+			if (countEl) countEl.textContent = String(counts[key] ?? 0);
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+</script>
